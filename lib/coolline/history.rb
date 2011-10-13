@@ -1,4 +1,6 @@
 class Coolline
+  # Class used to keep track of input. It keeps a certain amount of lines at
+  # most in memory, and stores them in a file.
   class History
     def initialize(filename, max_size = 5000)
       @io       = File.open(filename, 'a+')
@@ -22,7 +24,7 @@ class Coolline
     end
 
     def search(pattern, first_line = -1)
-      return to_enum(:search, pattern) unless block_given?
+      return to_enum(:search, pattern, first_line) unless block_given?
       return if size == 0
 
       first_line %= size
@@ -36,7 +38,7 @@ class Coolline
       @io.flush
 
       @lines << el.dup
-      @lines.unshift if size > @max_size
+      @lines.delete_at(0) if @lines.size > @max_size
 
       self
     end
@@ -53,16 +55,15 @@ class Coolline
 
     private
     def load_lines
-      @io.seek 0, IO::SEEK_END
-      line_count = @io.lineno
-      byte_index = @io.pos
+      line_count = @io.count
       @io.rewind
 
       if line_count < @max_size
-        @lines = @io.lines.map(&:chomp)
+        @lines.concat @io.lines.map(&:chomp)
       else
         @io.each do |line| # surely inefficient
-          self << line.chomp
+          @lines << line.chomp
+          @lines.delete_at(0) if @lines.size > @max_size
         end
       end
     end
