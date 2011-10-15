@@ -28,7 +28,7 @@ class Coolline
       Handler.new("\C-f", &:forward_char),
       Handler.new("\C-b", &:backward_char),
       Handler.new("\C-d", &:kill_current_char),
-      Handler.new("\C-c") { raise Interrupt },
+      Handler.new("\C-c") { Process.kill(:INT, Process.pid) },
       Handler.new("\C-w", &:kill_backward_word),
       Handler.new("\C-t", &:transpose_chars),
       Handler.new("\C-n", &:next_history_line),
