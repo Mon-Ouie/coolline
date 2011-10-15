@@ -13,6 +13,8 @@ class Coolline
 
   NullFile = "/dev/null"
 
+  AnsiCode = %r{(\e\[\??\d+(?:;\d+)?\w)}
+
   # @return [Hash] All the defaults settings
   Settings = {
     :word_boundaries => [" ", "-", "_"],
@@ -179,7 +181,7 @@ class Coolline
         end_index   = start_index + left_width - 1
 
         i = 0
-        line.split(%r{(\e\[\??\d+(?:;\d+)?\w)}).each do |str|
+        line.split(AnsiCode).each do |str|
           if start_with_ansi_code? str
             # always print ansi codes to ensure the color is right
             print str
@@ -285,11 +287,11 @@ class Coolline
   end
 
   def strip_ansi_codes(string)
-    string.gsub(%r{\e\[\??\d+(?:;\d+)?\w}, "")
+    string.gsub(AnsiCode, "")
   end
 
   def start_with_ansi_code?(string)
-    (string =~ %r{\e\[\??\d+(?:;\d+)?\w}) == 0
+    (string =~ AnsiCode) == 0
   end
 
   private
