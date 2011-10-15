@@ -28,7 +28,7 @@ class Coolline
       Handler.new("\C-d", &:kill_current_char),
       Handler.new("\C-c") { raise Interrupt },
       Handler.new("\C-w", &:kill_backward_word),
-      Handler.new("\C-t", &:transpose_char),
+      Handler.new("\C-t", &:transpose_chars),
       Handler.new("\C-n", &:next_history_line),
       Handler.new("\C-p", &:previous_history_line),
       Handler.new("\C-r", &:interactive_search),
@@ -39,7 +39,10 @@ class Coolline
       Handler.new("\ef", &:forward_word),
       Handler.new("\e[C", &:forward_char),
       Handler.new("\e[B", &:backward_char),
-      Handler.new("\et", &:transpose_word),
+      Handler.new("\et", &:transpose_words),
+      Handler.new("\ec", &:capitalize_word),
+      Handler.new("\eu", &:uppercase_word),
+      Handler.new("\el", &:lowercase_word),
       Handler.new("\ea".."\ez") {},
     ],
 
@@ -50,6 +53,8 @@ class Coolline
     :history_file => HistoryFile,
     :history_size => 5000,
   }
+
+  include Coolline::Editor
 
   @config_loaded = false
 
@@ -100,7 +105,7 @@ class Coolline
 
   def word_boundaries=(array)
     @word_boundaries = array
-    @word_boundaries_regexp = Regexp.union(*array)
+    @word_boundaries_regexp = /\A#{Regexp.union(*array)}\z/
   end
 
   # @return [Proc] Proc called to change the way a line is displayed
@@ -213,119 +218,6 @@ class Coolline
     @output.print(*objs)
   end
 
-  # Inserts a string at the current position
-  # @param [String] str
-  def insert_string(str)
-    @line.insert @pos, str
-    @pos += str.size
-  end
-
-  # Removes the previous character, if there's one
-  def kill_backward_char
-    if @pos != 0
-      @line[@pos - 1] = ''
-      @pos -= 1
-    end
-  end
-
-  # Moves the cursor to the beginning of the line
-  def beginning_of_line
-    @pos = 0
-  end
-
-  # Moves the cursor to the end of the line
-  def end_of_line
-    @pos = @line.size
-  end
-
-  # Removes all the characters after the cursor
-  def kill_line
-    @line[@pos..-1] = ""
-  end
-
-  # Moves 1 character forward
-  def forward_char
-    @pos += 1 if @pos != @line.size
-  end
-
-  # Moves 1 character backward
-  def backward_char
-    @pos -= 1 if @pos != 0
-  end
-
-  # Removes the current character
-  def kill_current_char
-    @line[@pos] = "" if @pos != @line.size
-  end
-
-  # Removes the previous word
-  def kill_backward_word
-    if @pos != 0
-      pos = @pos - 1
-      pos -= 1 if pos != -1 and word_boundary? @line[pos]
-      pos -= 1 until pos == -1 or word_boundary? @line[pos]
-      @line[(pos + 1)..@pos] = ""
-      @pos = pos + 1
-    end
-  end
-
-  # Swaps the two previous characters
-  def transpose_char
-    if @pos >= 2
-      pos = @pos == @line.size ? @pos - 1 : @pos
-      @line[pos], @line[pos - 1] = @line[pos - 1], @line[pos]
-    end
-  end
-
-  # Moves one word backward
-  def backward_word
-    if @pos != 0
-      pos = @pos - 1
-      pos -= 1 if pos != -1 and word_boundary? @line[pos]
-      pos -= 1 until pos == -1 or word_boundary? @line[pos]
-      @pos = pos + 1
-    end
-  end
-
-  # Moves one word forward
-  def forward_word
-    if @pos != @line.size
-      pos = @pos + 1
-      pos += 1 if pos != @line.size and word_boundary? @line[pos]
-      pos += 1 until pos == @line.size or word_boundary? @line[pos]
-      @pos = pos
-    end
-  end
-
-  # Swaps the two previous words
-  def transpose_word
-    start_pos = @pos
-    pos = @pos - 1
-
-    if pos != -1 and word_boundary? @line[pos]
-      pos -= 1
-      start_pos -= 1
-    end
-
-    pos -= 1 until pos == -1 or word_boundary? @line[pos]
-    previous_word = @line[(pos + 1)..start_pos]
-
-    prev_pos = pos
-
-    if pos != -1 and word_boundary? @line[pos]
-      prev_pos -= 1
-      pos -= 1
-    end
-
-    pos -= 1 until pos == -1 or word_boundary? @line[pos]
-    first_word = @line[(pos + 1)..prev_pos]
-
-    if !first_word.empty? && !previous_word.empty? &&
-        prev_pos >= 0 && start_pos >= 0
-      @line[(pos + 1)..@pos] = "#{previous_word} #{first_word}"
-    end
-  end
-
   # Selects the previous line in history (if any)
   def previous_history_line
     if @history_index - 1 >= 0
@@ -388,6 +280,18 @@ class Coolline
     @history_moved = true
   end
 
+  def word_boundary?(char)
+    char =~ word_boundaries_regexp
+  end
+
+  def strip_ansi_codes(string)
+    string.gsub(%r{\e\[\??\d+(?:;\d+)?\w}, "")
+  end
+
+  def start_with_ansi_code?(string)
+    (string =~ %r{\e\[\??\d+(?:;\d+)?\w}) == 0
+  end
+
   private
   def transform(line)
     @transform_proc.call(line)
@@ -423,17 +327,5 @@ class Coolline
 
       str
     end
-  end
-
-  def word_boundary?(char)
-    char =~ word_boundaries_regexp
-  end
-
-  def strip_ansi_codes(string)
-    string.gsub(%r{\e\[\??\d+(?:;\d+)?\w}, "")
-  end
-
-  def start_with_ansi_code?(string)
-    (string =~ %r{\e\[\??\d+(?:;\d+)?\w}) == 0
   end
 end
