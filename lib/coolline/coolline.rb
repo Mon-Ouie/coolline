@@ -283,6 +283,11 @@ class Coolline
     @history_moved = true
   end
 
+  # @return [String] The string to be completed (useful in the completion proc)
+  def completed_word
+    line[word_beginning_before(pos)...pos]
+  end
+
   # Tries to complete the current word
   def complete
     return if word_boundary? line[pos - 1]
@@ -299,7 +304,7 @@ class Coolline
 
     beg = word_beginning_before(pos)
     line[beg...pos] = result
-    self.pos += result.size - pos + beg
+    self.pos = beg + result.size
   end
 
   def word_boundary?(char)

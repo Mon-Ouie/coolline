@@ -10,8 +10,8 @@ cool = Coolline.new do |c|
   end
 
   c.completion_proc = proc do
-    word = c.line[c.word_beginning_before(c.pos)...c.pos]
-    ["awesome", "aweful"].select { |w| w.start_with? word }
+    word = c.completed_word
+    Object.constants.map(&:to_s).select { |w| w.start_with? word }
   end
 end
 
