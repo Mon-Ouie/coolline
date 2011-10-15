@@ -34,6 +34,7 @@ class Coolline
       Handler.new("\C-n", &:next_history_line),
       Handler.new("\C-p", &:previous_history_line),
       Handler.new("\C-r", &:interactive_search),
+      Handler.new("\t", &:complete),
       Handler.new("\C-a".."\C-z") {},
 
       Handler.new(/\e\C-h|\e\x7F/, &:kill_backward_word),
@@ -280,6 +281,25 @@ class Coolline
 
     @history_index = found_index
     @history_moved = true
+  end
+
+  # Tries to complete the current word
+  def complete
+    return if word_boundary? line[pos - 1]
+
+    completions = @completion_proc.call(self)
+    return if completions.empty?
+
+    result = completions.inject do |common, el|
+      i = 0
+      i += 1 while common[i] == el[i]
+
+      el[0...i]
+    end
+
+    beg = word_beginning_before(pos)
+    line[beg...pos] = result
+    self.pos += result.size - pos + beg
   end
 
   def word_boundary?(char)
