@@ -138,9 +138,14 @@ class Coolline
   # @return [Integer] Cursor position
   attr_accessor :pos
 
+  # @return [String] Current prompt
+  attr_accessor :prompt
+
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
   def readline(prompt = ">> ")
+    @prompt = prompt
+
     @line        = ""
     @pos         = 0
     @accumulator = nil
@@ -149,7 +154,7 @@ class Coolline
     @history_moved = false
 
     print "\r\e[0m\e[0K"
-    print prompt
+    print @prompt
 
     until (char = @input.getch) == "\r"
       handle(char)
@@ -161,7 +166,7 @@ class Coolline
       end
 
       width       = @input.winsize[1]
-      prompt_size = strip_ansi_codes(prompt).size
+      prompt_size = strip_ansi_codes(@prompt).size
       line        = transform(@line)
 
       stripped_line_width = strip_ansi_codes(line).size
@@ -170,13 +175,13 @@ class Coolline
       # reset the color, and kill the line
       print "\r\e[0m\e[0K"
 
-      if strip_ansi_codes(prompt + line).size <= width
-        print prompt + line
+      if strip_ansi_codes(@prompt + line).size <= width
+        print @prompt + line
         print "\e[#{prompt_size + @pos + 1}G"
       else
-        print prompt
+        print @prompt
 
-        left_width = width - strip_ansi_codes(prompt).size
+        left_width = width - prompt_size
 
         start_index = [@pos - left_width + 1, 0].max
         end_index   = start_index + left_width - 1
