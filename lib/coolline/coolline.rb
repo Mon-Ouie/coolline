@@ -21,7 +21,7 @@ class Coolline
 
     :handlers =>
      [
-      Handler.new(/\C-h|\x7F/, &:kill_backward_char),
+      Handler.new(/\A(?:\C-h|\x7F)\z/, &:kill_backward_char),
       Handler.new("\C-a", &:beginning_of_line),
       Handler.new("\C-e", &:end_of_line),
       Handler.new("\C-k", &:kill_line),
@@ -37,16 +37,21 @@ class Coolline
       Handler.new("\t", &:complete),
       Handler.new("\C-a".."\C-z") {},
 
-      Handler.new(/\e\C-h|\e\x7F/, &:kill_backward_word),
+      Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
       Handler.new("\eb", &:backward_word),
       Handler.new("\ef", &:forward_word),
+      Handler.new("\e[A", &:previous_history_line),
+      Handler.new("\e[B", &:next_history_line),
+      Handler.new("\e[5~", &:previous_history_line),
+      Handler.new("\e[6~", &:next_history_line),
       Handler.new("\e[C", &:forward_char),
-      Handler.new("\e[B", &:backward_char),
+      Handler.new("\e[D", &:backward_char),
       Handler.new("\et", &:transpose_words),
       Handler.new("\ec", &:capitalize_word),
       Handler.new("\eu", &:uppercase_word),
       Handler.new("\el", &:lowercase_word),
-      Handler.new("\ea".."\ez") {},
+
+      Handler.new(/\e.+/) {},
     ],
 
     :unknown_char_proc => :insert_string.to_proc,
@@ -349,8 +354,9 @@ class Coolline
   end
 
   def handle_escape(char)
-    if char == "[" && @accumulator == "\e" or
-        char =~ /[56]/ && @accumulator == "\e["
+    if char == "[" && @accumulator =~ /\A\e?\e\z/ or
+        char =~ /\d/ && @accumulator =~ /\A\e?\e\[\d*\z/ or
+        char == "\e" && @accumulator == "\e"
       @accumulator << char
       nil
     else
