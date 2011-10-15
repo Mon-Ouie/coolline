@@ -99,7 +99,7 @@ class Coolline
 
     yield self if block_given?
 
-    @history = History.new(@history_file, @history_size)
+    @history ||= History.new(@history_file, @history_size)
   end
 
   # @return [IO]
@@ -135,7 +135,7 @@ class Coolline
   attr_accessor :history_size
 
   # @return [History] History object
-  attr_reader :history
+  attr_accessor :history
 
   # @return [String] Current line
   attr_reader :line
