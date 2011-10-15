@@ -34,3 +34,5 @@ Installation
 ============
 
     gem install coolline --pre
+
+Notice this needs io-console (which is part of Ruby 1.9.3).
