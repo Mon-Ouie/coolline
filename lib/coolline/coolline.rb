@@ -11,7 +11,11 @@ class Coolline
 
   HistoryFile = File.join(ConfigDir, ".coolline-history")
 
-  NullFile = "/dev/null"
+  NullFile = if defined? File::NULL
+               File::NULL
+             else
+               "/dev/null"
+             end
 
   AnsiCode = %r{(\e\[\??\d+(?:;\d+)?\w)}
 
