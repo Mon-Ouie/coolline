@@ -267,7 +267,6 @@ class Coolline
 
   # Prompts the user to search for a line
   def interactive_search
-    initial_index = @history_index
     found_index   = @history_index
 
     # Use another coolline instance for the search! :D
