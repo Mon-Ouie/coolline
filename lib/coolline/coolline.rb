@@ -31,7 +31,7 @@ class Coolline
       Handler.new("\C-k", &:kill_line),
       Handler.new("\C-f", &:forward_char),
       Handler.new("\C-b", &:backward_char),
-      Handler.new("\C-d", &:kill_current_char),
+      Handler.new("\C-d", &:kill_current_char_or_leave),
       Handler.new("\C-c") { Process.kill(:INT, Process.pid) },
       Handler.new("\C-w", &:kill_backward_word),
       Handler.new("\C-t", &:transpose_chars),
@@ -162,11 +162,14 @@ class Coolline
     @history_index = @history.size
     @history_moved = false
 
+    @should_exit = false
+
     print "\r\e[0m\e[0K"
     print @prompt
 
     until (char = @input.getch) == "\r"
       handle(char)
+      return if @should_exit
 
       if @history_moved
         @history_moved = false
@@ -295,6 +298,14 @@ class Coolline
 
     @history_index = found_index
     @history_moved = true
+  end
+
+  def kill_current_char_or_leave
+    if @line.empty?
+      @should_exit = true
+    else
+      kill_current_char
+    end
   end
 
   # @return [String] The string to be completed (useful in the completion proc)
