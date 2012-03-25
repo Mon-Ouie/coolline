@@ -254,7 +254,7 @@ class Coolline
   # string.
   def next_history_line
     if @history.index + 1 <= @history.size
-      @line.replace @history[@history.index + 1]||@history.on_index
+      @line.replace @history[@history.index + 1]
       @pos = [@line.size, @pos].min
       @history.index += 1
 	else

@@ -11,7 +11,6 @@ class Coolline
       @lines = []
 
       load_lines
-	  delete_null
 	  @index = size
     end
 
