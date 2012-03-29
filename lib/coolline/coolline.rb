@@ -246,6 +246,7 @@ class Coolline
       @history.index -= 1
     end
     @history_moved = true
+	end_of_line
   end
 
   # Selects the next line in history (if any).
@@ -263,6 +264,7 @@ class Coolline
 		@pos = @line.size
 	end
     @history_moved = true
+	end_of_line
   end
 
   # Prompts the user to search for a line
