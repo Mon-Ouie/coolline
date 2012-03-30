@@ -177,8 +177,6 @@ class Coolline
 
       if @history_moved
         @history_moved = false
-      else
-        @history_index = @history.size - 1
       end
 
       width          = @input.winsize[1]
