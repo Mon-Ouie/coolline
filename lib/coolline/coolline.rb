@@ -157,7 +157,6 @@ class Coolline
 
 	@history.delete_null()
     @line        = ""
-	@line_cache  = @line
     @pos         = 0
     @accumulator = nil
 
@@ -167,8 +166,9 @@ class Coolline
 
     print "\r\e[0m\e[0K"
     print @prompt
-
+	@history.index = @history.size - 1
 	@history << @line
+
     until (char = @input.getch) == "\r"
       handle(char)
       return if @should_exit
@@ -176,12 +176,11 @@ class Coolline
       if @history_moved
         @history_moved = false
       else
-        @history_index = @history.size
+        @history_index = @history.size - 1
       end
-
-      width       = @input.winsize[1]
-      prompt_size = strip_ansi_codes(@prompt).size
-      line        = transform(@line)
+      width          = @input.winsize[1]
+      prompt_size    = strip_ansi_codes(@prompt).size
+      line           = transform(@line)
 
       stripped_line_width = strip_ansi_codes(line).size
       line << " " * [width - stripped_line_width - prompt_size, 0].max
@@ -220,11 +219,10 @@ class Coolline
           print "\e[#{prompt_size + @pos + 1}G"
         end
       end
-	  @history[-1] = @line
     end
-
     print "\n"
 	@history[-1] = @line
+	@history.index = @history.size
     @line + "\n"
   end
 
@@ -240,10 +238,11 @@ class Coolline
 
   # Selects the previous line in history (if any)
   def previous_history_line
-    if @history.index - 1 >= 0
-      @line.replace @history[@history.index - 1]
-      @pos = [@line.size, @pos].min
-      @history.index -= 1
+	if @history.index >= 0
+		@line.replace @history[@history.index]
+		@pos = [@line.size, @pos].min
+		@history.index -= 1
+		@history[-1]    = ''
     end
     @history_moved = true
 	end_of_line
@@ -254,13 +253,14 @@ class Coolline
   # When on the last line, this method replaces the current line with an empty
   # string.
   def next_history_line
-    if @history.index + 1 <= @history.size
-      @line.replace @history[@history.index + 1]||@history.on_index
-      @pos = [@line.size, @pos].min
+    if @history.index + 1 < @history.size
       @history.index += 1
+	  @line.replace @history[@history.index + 1]||@history.on_index
+      @pos = [@line.size, @pos].min
+	  @history[-1] = ''
 	else
 		@line.replace @history[-1]
-		@history.index = @history.size
+		@history.index = @history.size - 1
 		@pos = @line.size
 	end
     @history_moved = true
