@@ -268,7 +268,7 @@ class Coolline
 
   # Prompts the user to search for a line
   def interactive_search
-    found_index   = @history_index
+    found_index   = @history.index
 
     # Use another coolline instance for the search! :D
     Coolline.new { |c|
@@ -279,7 +279,7 @@ class Coolline
       c.transform_proc = proc do
         pattern = Regexp.new Regexp.escape(c.line)
 
-        line, found_index = @history.search(pattern, @history_index).first
+        line, found_index = @history.search(pattern, @history.index).first
 
         if line
           "#{c.line}): #{line}"
@@ -296,7 +296,7 @@ class Coolline
     @line.replace @history[found_index]
     @pos = [@line.size, @pos].min
 
-    @history_index = found_index
+    @history.index = found_index
     @history_moved = true
   end
 
