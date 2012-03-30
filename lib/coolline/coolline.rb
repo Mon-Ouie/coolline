@@ -24,38 +24,38 @@ class Coolline
     :word_boundaries => [" ", "-", "_"],
 
     :handlers =>
-     [
-      Handler.new(/\A(?:\C-h|\x7F)\z/, &:kill_backward_char),
-      Handler.new( ?\C-a, &:beginning_of_line),
-      Handler.new( ?\C-e, &:end_of_line),
-      Handler.new( ?\C-k, &:kill_line),
-      Handler.new( ?\C-f, &:forward_char),
-      Handler.new( ?\C-b, &:backward_char),
-      Handler.new( ?\C-d, &:kill_current_char_or_leave),
-      Handler.new( ?\C-c) { Process.kill(:INT, Process.pid) },
-      Handler.new( ?\C-w, &:kill_backward_word),
-      Handler.new( ?\C-t, &:transpose_chars),
-      Handler.new( ?\C-n, &:next_history_line),
-      Handler.new( ?\C-p, &:previous_history_line),
-      Handler.new( ?\C-r, &:interactive_search),
-      Handler.new( ?\t,   &:complete),
-      Handler.new( ?\C-a..?\C-z) {},
+    [
+     Handler.new(/\A(?:\C-h|\x7F)\z/, &:kill_backward_char),
+     Handler.new(?\C-a, &:beginning_of_line),
+     Handler.new(?\C-e, &:end_of_line),
+     Handler.new(?\C-k, &:kill_line),
+     Handler.new(?\C-f, &:forward_char),
+     Handler.new(?\C-b, &:backward_char),
+     Handler.new(?\C-d, &:kill_current_char_or_leave),
+     Handler.new(?\C-c) { Process.kill(:INT, Process.pid) },
+     Handler.new(?\C-w, &:kill_backward_word),
+     Handler.new(?\C-t, &:transpose_chars),
+     Handler.new(?\C-n, &:next_history_line),
+     Handler.new(?\C-p, &:previous_history_line),
+     Handler.new(?\C-r, &:interactive_search),
+     Handler.new(?\t,   &:complete),
+     Handler.new(?\C-a..?\C-z) {},
 
-      Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
-      Handler.new("\eb", &:backward_word),
-      Handler.new("\ef", &:forward_word),
-      Handler.new("\e[A", &:previous_history_line),
-      Handler.new("\e[B", &:next_history_line),
-      Handler.new("\e[5~", &:previous_history_line),
-      Handler.new("\e[6~", &:next_history_line),
-      Handler.new("\e[C", &:forward_char),
-      Handler.new("\e[D", &:backward_char),
-      Handler.new("\et", &:transpose_words),
-      Handler.new("\ec", &:capitalize_word),
-      Handler.new("\eu", &:uppercase_word),
-      Handler.new("\el", &:lowercase_word),
+     Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
+     Handler.new("\eb", &:backward_word),
+     Handler.new("\ef", &:forward_word),
+     Handler.new("\e[A", &:previous_history_line),
+     Handler.new("\e[B", &:next_history_line),
+     Handler.new("\e[5~", &:previous_history_line),
+     Handler.new("\e[6~", &:next_history_line),
+     Handler.new("\e[C", &:forward_char),
+     Handler.new("\e[D", &:backward_char),
+     Handler.new("\et", &:transpose_words),
+     Handler.new("\ec", &:capitalize_word),
+     Handler.new("\eu", &:uppercase_word),
+     Handler.new("\el", &:lowercase_word),
 
-      Handler.new(/\e.+/) {},
+     Handler.new(/\e.+/) {},
     ],
 
     :unknown_char_proc => :insert_string.to_proc,
@@ -155,7 +155,8 @@ class Coolline
   def readline(prompt = ">> ")
     @prompt = prompt
 
-	@history.delete_null()
+    @history.delete_empty
+
     @line        = ""
     @pos         = 0
     @accumulator = nil
@@ -166,8 +167,8 @@ class Coolline
 
     print "\r\e[0m\e[0K"
     print @prompt
-	@history.index = @history.size - 1
-	@history << @line
+    @history.index = @history.size - 1
+    @history << @line
 
     until (char = @input.getch) == "\r"
       handle(char)
@@ -221,8 +222,8 @@ class Coolline
       end
     end
     print "\n"
-	@history[-1] = @line
-	@history.index = @history.size
+    @history[-1] = @line
+    @history.index = @history.size
     @line + "\n"
   end
 
@@ -238,13 +239,13 @@ class Coolline
 
   # Selects the previous line in history (if any)
   def previous_history_line
-	if @history.index >= 0
-		@line.replace @history[@history.index]
-		@pos = [@line.size, @pos].min
-		@history.index -= 1
+    if @history.index >= 0
+      @line.replace @history[@history.index]
+      @history.index -= 1
     end
+
     @history_moved = true
-	end_of_line
+    end_of_line
   end
 
   # Selects the next line in history (if any).
@@ -254,15 +255,15 @@ class Coolline
   def next_history_line
     if @history.index + 2 < @history.size
       @history.index += 1
-	  @line.replace @history[@history.index + 1]||@history.on_index
-      @pos = [@line.size, @pos].min
-	else
-		@line.replace @history[-1]
-		@history.index = @history.size - 2
-		@pos = @line.size
-	end
+      @line.replace @history[@history.index + 1] || @history.current
+    else
+      @line.replace @history[-1]
+      @history.index = @history.size - 2
+    end
+
     @history_moved = true
-	end_of_line
+
+    end_of_line
   end
 
   # Prompts the user to search for a line
