@@ -242,7 +242,6 @@ class Coolline
 		@line.replace @history[@history.index]
 		@pos = [@line.size, @pos].min
 		@history.index -= 1
-		@history[-1]    = ''
     end
     @history_moved = true
 	end_of_line
@@ -253,14 +252,13 @@ class Coolline
   # When on the last line, this method replaces the current line with an empty
   # string.
   def next_history_line
-    if @history.index + 1 < @history.size
+    if @history.index + 2 < @history.size
       @history.index += 1
 	  @line.replace @history[@history.index + 1]||@history.on_index
       @pos = [@line.size, @pos].min
-	  @history[-1] = ''
 	else
 		@line.replace @history[-1]
-		@history.index = @history.size - 1
+		@history.index = @history.size - 2
 		@pos = @line.size
 	end
     @history_moved = true
