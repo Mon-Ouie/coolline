@@ -13,6 +13,7 @@ cool = Coolline.new do |c|
     word = c.completed_word
     Object.constants.map(&:to_s).select { |w| w.start_with? word }
   end
+
 end
 
 # At some point, it became frustrating to just print lines without showing any

@@ -2,13 +2,17 @@ class Coolline
   # Class used to keep track of input. It keeps a certain amount of lines at
   # most in memory, and stores them in a file.
   class History
-    def initialize(filename, max_size = 5000)
+	attr_accessor :index
+	
+	def initialize(filename, max_size = 5000)
       @io       = File.open(filename, 'a+')
       @max_size = max_size
 
       @lines = []
 
       load_lines
+	  delete_null
+	  @index = size
     end
 
     def reopen(filename)
@@ -33,6 +37,11 @@ class Coolline
       end
     end
 
+	
+	def delete_null
+		@lines.delete_if {|x| x == "" }
+	end
+	
     def <<(el)
       @io.puts el
       @io.flush
@@ -43,9 +52,17 @@ class Coolline
       self
     end
 
+	def on_index
+		return self[@index]
+	end
+	
     def [](id)
       @lines[id]
     end
+	
+	def []=(id,val)
+		@lines[id] = val
+	end
 
     def size
       @lines.size

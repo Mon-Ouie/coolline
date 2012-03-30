@@ -26,20 +26,20 @@ class Coolline
     :handlers =>
      [
       Handler.new(/\A(?:\C-h|\x7F)\z/, &:kill_backward_char),
-      Handler.new("\C-a", &:beginning_of_line),
-      Handler.new("\C-e", &:end_of_line),
-      Handler.new("\C-k", &:kill_line),
-      Handler.new("\C-f", &:forward_char),
-      Handler.new("\C-b", &:backward_char),
-      Handler.new("\C-d", &:kill_current_char_or_leave),
-      Handler.new("\C-c") { Process.kill(:INT, Process.pid) },
-      Handler.new("\C-w", &:kill_backward_word),
-      Handler.new("\C-t", &:transpose_chars),
-      Handler.new("\C-n", &:next_history_line),
-      Handler.new("\C-p", &:previous_history_line),
-      Handler.new("\C-r", &:interactive_search),
-      Handler.new("\t", &:complete),
-      Handler.new("\C-a".."\C-z") {},
+      Handler.new( ?\C-a, &:beginning_of_line),
+      Handler.new( ?\C-e, &:end_of_line),
+      Handler.new( ?\C-k, &:kill_line),
+      Handler.new( ?\C-f, &:forward_char),
+      Handler.new( ?\C-b, &:backward_char),
+      Handler.new( ?\C-d, &:kill_current_char_or_leave),
+      Handler.new( ?\C-c) { Process.kill(:INT, Process.pid) },
+      Handler.new( ?\C-w, &:kill_backward_word),
+      Handler.new( ?\C-t, &:transpose_chars),
+      Handler.new( ?\C-n, &:next_history_line),
+      Handler.new( ?\C-p, &:previous_history_line),
+      Handler.new( ?\C-r, &:interactive_search),
+      Handler.new( ?\t,   &:complete),
+      Handler.new( ?\C-a..?\C-z) {},
 
       Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
       Handler.new("\eb", &:backward_word),
@@ -155,17 +155,19 @@ class Coolline
   def readline(prompt = ">> ")
     @prompt = prompt
 
+	@history.delete_null()
     @line        = ""
     @pos         = 0
     @accumulator = nil
 
-    @history_index = @history.size
     @history_moved = false
 
     @should_exit = false
 
     print "\r\e[0m\e[0K"
     print @prompt
+	@history.index = @history.size - 1
+	@history << @line
 
     until (char = @input.getch) == "\r"
       handle(char)
@@ -174,12 +176,11 @@ class Coolline
       if @history_moved
         @history_moved = false
       else
-        @history_index = @history.size
+        @history_index = @history.size - 1
       end
-
-      width       = @input.winsize[1]
-      prompt_size = strip_ansi_codes(@prompt).size
-      line        = transform(@line)
+      width          = @input.winsize[1]
+      prompt_size    = strip_ansi_codes(@prompt).size
+      line           = transform(@line)
 
       stripped_line_width = strip_ansi_codes(line).size
       line << " " * [width - stripped_line_width - prompt_size, 0].max
@@ -214,17 +215,14 @@ class Coolline
             break if i >= end_index
           end
         end
-
         if @pos < left_width + 1
           print "\e[#{prompt_size + @pos + 1}G"
         end
       end
     end
-
     print "\n"
-
-    @history << @line
-
+	@history[-1] = @line
+	@history.index = @history.size
     @line + "\n"
   end
 
@@ -240,14 +238,13 @@ class Coolline
 
   # Selects the previous line in history (if any)
   def previous_history_line
-    if @history_index - 1 >= 0
-      @line.replace @history[@history_index - 1]
-      @pos = [@line.size, @pos].min
-
-      @history_index -= 1
+	if @history.index >= 0
+		@line.replace @history[@history.index]
+		@pos = [@line.size, @pos].min
+		@history.index -= 1
     end
-
     @history_moved = true
+	end_of_line
   end
 
   # Selects the next line in history (if any).
@@ -255,14 +252,17 @@ class Coolline
   # When on the last line, this method replaces the current line with an empty
   # string.
   def next_history_line
-    if @history_index + 1 <= @history.size
-      @line.replace @history[@history_index + 1] || ""
+    if @history.index + 2 < @history.size
+      @history.index += 1
+	  @line.replace @history[@history.index + 1]||@history.on_index
       @pos = [@line.size, @pos].min
-
-      @history_index += 1
-    end
-
+	else
+		@line.replace @history[-1]
+		@history.index = @history.size - 2
+		@pos = @line.size
+	end
     @history_moved = true
+	end_of_line
   end
 
   # Prompts the user to search for a line
