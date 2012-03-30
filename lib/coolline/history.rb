@@ -59,7 +59,7 @@ class Coolline
       @lines[id]
     end
 
-    def []=(id,val)
+    def []=(id, val)
       @lines[id] = val
     end
 

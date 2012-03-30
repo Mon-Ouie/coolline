@@ -167,6 +167,7 @@ class Coolline
 
     print "\r\e[0m\e[0K"
     print @prompt
+
     @history.index = @history.size - 1
     @history << @line
 
@@ -179,6 +180,7 @@ class Coolline
       else
         @history_index = @history.size - 1
       end
+
       width          = @input.winsize[1]
       prompt_size    = strip_ansi_codes(@prompt).size
       line           = transform(@line)
@@ -221,9 +223,12 @@ class Coolline
         end
       end
     end
+
     print "\n"
-    @history[-1] = @line
+
+    @history[-1] = @line if @history.size != 0
     @history.index = @history.size
+
     @line + "\n"
   end
 
@@ -268,7 +273,7 @@ class Coolline
 
   # Prompts the user to search for a line
   def interactive_search
-    found_index   = @history.index
+    found_index = @history.index
 
     # Use another coolline instance for the search! :D
     Coolline.new { |c|
@@ -292,6 +297,8 @@ class Coolline
       c.history_file = NullFile
       c.history_size = 0
     }.readline("(search:")
+
+    found_index ||= @history.index
 
     @line.replace @history[found_index]
     @pos = [@line.size, @pos].min
