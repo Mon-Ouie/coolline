@@ -29,6 +29,7 @@ class Coolline
      Handler.new(?\C-a, &:beginning_of_line),
      Handler.new(?\C-e, &:end_of_line),
      Handler.new(?\C-k, &:kill_line),
+     Handler.new(?\C-u, &:clear_line),
      Handler.new(?\C-f, &:forward_char),
      Handler.new(?\C-b, &:backward_char),
      Handler.new(?\C-d, &:kill_current_char_or_leave),

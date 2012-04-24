@@ -128,6 +128,12 @@ class Coolline
       line[pos..-1] = ""
     end
 
+    # Removes all the characters in the line
+    def clear_line
+      line.clear
+      self.pos = 0
+    end
+
     # Swaps the previous character with the current one
     def transpose_chars
       if line.size >= 2
