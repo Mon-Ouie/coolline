@@ -1,14 +1,13 @@
 require 'io/console'
 
 class Coolline
-  if ENV["XDG_CONFIG_HOME"]
-    ConfigDir   = ENV["XDG_CONFIG_HOME"]
-    ConfigFile  = File.join(ConfigDir,  "coolline.rb")
+  if config_home = ENV["XDG_CONFIG_HOME"] && !config_home.empty?
+    ConfigDir = config_home
   else
-    ConfigDir  = ENV["HOME"]
-    ConfigFile = File.join(ConfigDir, ".coolline.rb")
+    ConfigDir = File.join(ENV["HOME"], ".config")
   end
 
+  ConfigFile = File.join(ConfigDir, "coolline.rb")
   HistoryFile = File.join(ConfigDir, ".coolline-history")
 
   NullFile = if defined? File::NULL
