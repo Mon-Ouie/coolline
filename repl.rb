@@ -24,8 +24,12 @@ end
 
 loop do
   line = cool.readline
-  obj  = eval(line)
+  break if line == "exit\n"
+
+  obj = eval(line)
 
   print "=> "
   pp obj
 end
+
+cool.close
