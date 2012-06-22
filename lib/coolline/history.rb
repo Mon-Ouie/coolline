@@ -42,9 +42,6 @@ class Coolline
     end
 
     def <<(el)
-      @io.puts el
-      @io.flush
-
       @lines << el.dup
       @lines.delete_at(0) if @lines.size > @max_size
 
@@ -61,6 +58,11 @@ class Coolline
 
     def []=(id, val)
       @lines[id] = val
+    end
+
+    def save_line
+      @io.puts self[-1]
+      @io.flush
     end
 
     def size

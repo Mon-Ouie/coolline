@@ -247,6 +247,8 @@ class Coolline
     @history[-1] = @line if @history.size != 0
     @history.index = @history.size
 
+    @history.save_line
+
     @line + "\n"
   end
 
@@ -258,6 +260,12 @@ class Coolline
   # Prints objects to the output.
   def print(*objs)
     @output.print(*objs)
+  end
+
+  # Closes the History object. Should be called when you're done with a Coolline
+  # instance.
+  def close
+    @history.close
   end
 
   # Selects the previous line in history (if any)
