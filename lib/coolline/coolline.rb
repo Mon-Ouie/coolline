@@ -90,6 +90,15 @@ class Coolline
     load_config! unless @config_loaded
   end
 
+  # Binds a key to a block. This key binding will have precedence over already
+  # defined key bindings.
+  #
+  # @param [String] key Key code sent by the terminal
+  # @yieldparam [Coolline] cool Coolline instance to use
+  def self.bind(key, &action)
+    Coolline::Settings[:handlers].unshift Coolline::Handler.new(key, &action)
+  end
+
   # Creates a new cool line.
   #
   # @yieldparam [Coolline] self

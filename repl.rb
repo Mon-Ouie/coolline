@@ -4,6 +4,10 @@ require 'coolline'
 require 'coderay'
 require 'pp'
 
+Coolline.bind "\C-z" do |c|
+  puts c.object_id
+end
+
 cool = Coolline.new do |c|
   c.transform_proc = proc do
     CodeRay.scan(c.line, :ruby).term
