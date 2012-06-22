@@ -5,7 +5,7 @@ class Coolline
     attr_accessor :index
 
     def initialize(filename, max_size = 5000)
-      @io       = File.open(filename, 'a+')
+      @io       = open_file(filename)
       @max_size = max_size
 
       @lines = []
@@ -17,7 +17,7 @@ class Coolline
 
     def reopen(filename)
       close
-      @io = File.open(filename, 'a+')
+      @io = open_file(filename)
 
       load_lines
     end
@@ -70,6 +70,7 @@ class Coolline
     attr_accessor :max_size
 
     private
+
     def load_lines
       line_count = @io.count
       @io.rewind
@@ -82,6 +83,26 @@ class Coolline
           @lines.delete_at(0) if @lines.size > @max_size
         end
       end
+    end
+
+    def open_file(filename)
+      dirname = File.dirname(filename)
+
+      if !Dir.exist?(dirname)
+        create_path(dirname)
+      end
+
+      File.open(filename, "a+")
+    end
+
+    def create_path(path)
+      dir = File.dirname(path)
+
+      if !Dir.exist? dir
+        create_path(dir)
+      end
+
+      Dir.mkdir(path, 0700)
     end
   end
 end

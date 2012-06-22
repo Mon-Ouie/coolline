@@ -1,14 +1,20 @@
 require 'io/console'
 
 class Coolline
-  if config_home = ENV["XDG_CONFIG_HOME"] && !config_home.empty?
-    ConfigDir = config_home
+  if config_home = ENV["XDG_CONFIG_HOME"] and !config_home.empty?
+    ConfigDir = File.join(config_home, "coolline")
   else
-    ConfigDir = File.join(ENV["HOME"], ".config")
+    ConfigDir = File.join(ENV["HOME"], ".config", "coolline")
+  end
+
+  if cache_home = ENV["XDG_CACHE_HOME"] and !cache_home.empty?
+    CacheDir = File.join(cache_home, "coolline")
+  else
+    CacheDir = File.join(ENV["HOME"], ".cache", "coolline")
   end
 
   ConfigFile = File.join(ConfigDir, "coolline.rb")
-  HistoryFile = File.join(ConfigDir, ".coolline-history")
+  HistoryFile = File.join(CacheDir, "history")
 
   NullFile = if defined? File::NULL
                File::NULL
