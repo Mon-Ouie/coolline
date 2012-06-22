@@ -29,6 +29,16 @@ implementation of live syntax highlighting:
       pp obj
     end
 
+Configuration
+=============
+
+Coolline automatically loads a config file before starting, which allows adding
+new key bindings to it. The file is just a chunk of arbitrary ruby code located
+at ``$XDG_CONFIG_HOME/coolline/coolline.rb``.
+
+     Coolline.bind "\C-z" do |cool|
+       puts "Testing key binding with #{cool}!"
+     end
 
 Installation
 ============
