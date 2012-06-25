@@ -43,6 +43,6 @@ at ``$XDG_CONFIG_HOME/coolline/coolline.rb``.
 Installation
 ============
 
-    gem install coolline --pre
+    gem install coolline
 
 Notice this needs io-console (which is part of Ruby 1.9.3).
