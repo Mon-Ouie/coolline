@@ -44,6 +44,7 @@ class Coolline
      Handler.new(?\C-n, &:next_history_line),
      Handler.new(?\C-p, &:previous_history_line),
      Handler.new(?\C-r, &:interactive_search),
+     Handler.new(?\C-l, &:clear_screen),
      Handler.new(?\t,   &:complete),
      Handler.new(?\C-a..?\C-z) {},
 
@@ -65,6 +66,8 @@ class Coolline
      Handler.new("\ec", &:capitalize_word),
      Handler.new("\eu", &:uppercase_word),
      Handler.new("\el", &:lowercase_word),
+     Handler.new("\e<", &:first_history_line),
+     Handler.new("\e>", &:last_history_line),
 
      Handler.new(/\e.+/) {},
     ],
@@ -279,6 +282,15 @@ class Coolline
     end_of_line
   end
 
+  # Selects the first line of history
+  def first_history_line
+    @history.index = 0
+    @line.replace @history[0]
+
+    @history_moved = true
+    end_of_line
+  end
+
   # Selects the next line in history (if any).
   #
   # When on the last line, this method replaces the current line with an empty
@@ -294,6 +306,15 @@ class Coolline
 
     @history_moved = true
 
+    end_of_line
+  end
+
+  # Selects the last line of history
+  def last_history_line
+    @history.index = @history.size - 2
+    @line.replace @history[@history.index]
+
+    @history_moved = true
     end_of_line
   end
 
@@ -375,6 +396,11 @@ class Coolline
 
   def start_with_ansi_code?(string)
     (string =~ AnsiCode) == 0
+  end
+
+  def clear_screen
+    print "\e[2J"   # clear
+    print "\e[0;0H" # goto 0, 0
   end
 
   private
