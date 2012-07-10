@@ -22,7 +22,7 @@ class Coolline
                "/dev/null"
              end
 
-  AnsiCode = %r{(\e\[\??\d+(?:;\d+)?\w)}
+  AnsiCode = %r{(\e\[\??\d+(?:[;\d]*)\w)}
 
   # @return [Hash] All the defaults settings
   Settings = {
