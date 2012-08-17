@@ -252,7 +252,7 @@ class Coolline
 
     @history.save_line
 
-    @line + "\n"
+    @line
   end
 
   # Reads a line with no prompt
