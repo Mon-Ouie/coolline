@@ -73,7 +73,7 @@ class Coolline
     ],
 
     :unknown_char_proc => :insert_string.to_proc,
-    :transform_proc    => :line.to_proc,
+    :transform_proc    => proc { |line| line },
     :completion_proc   => proc { |cool| [] },
 
     :history_file => HistoryFile,
