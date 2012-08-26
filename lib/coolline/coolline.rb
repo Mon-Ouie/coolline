@@ -202,47 +202,7 @@ class Coolline
         @history_moved = false
       end
 
-      width          = @input.winsize[1]
-      prompt_size    = strip_ansi_codes(@prompt).size
-      line           = transform(@line)
-
-      stripped_line_width = strip_ansi_codes(line).size
-      line << " " * [width - stripped_line_width - prompt_size, 0].max
-
-      # reset the color, and kill the line
-      print "\r\e[0m\e[0K"
-
-      if strip_ansi_codes(@prompt + line).size <= width
-        print @prompt + line
-        print "\e[#{prompt_size + @pos + 1}G"
-      else
-        print @prompt
-
-        left_width = width - prompt_size
-
-        start_index = [@pos - left_width + 1, 0].max
-        end_index   = start_index + left_width - 1
-
-        i = 0
-        line.split(AnsiCode).each do |str|
-          if start_with_ansi_code? str
-            # always print ansi codes to ensure the color is right
-            print str
-          else
-            if i >= start_index
-              print str[0..(end_index - i)]
-            elsif i < start_index && i + str.size >= start_index
-              print str[(start_index - i), left_width]
-            end
-
-            i += str.size
-            break if i >= end_index
-          end
-        end
-        if @pos < left_width + 1
-          print "\e[#{prompt_size + @pos + 1}G"
-        end
-      end
+      render
     end
 
     print "\n"
@@ -253,6 +213,52 @@ class Coolline
     @history.save_line
 
     @line
+  end
+
+  # Displays the current code on the terminal
+  def render
+    width       = @input.winsize[1]
+    prompt_size = strip_ansi_codes(@prompt).size
+    line        = transform(@line)
+
+    stripped_line_width = strip_ansi_codes(line).size
+    line += " " * [width - stripped_line_width - prompt_size, 0].max
+
+    # reset the color, and kill the line
+    print "\r\e[0m\e[0K"
+
+    if strip_ansi_codes(@prompt + line).size <= width
+      print @prompt + line
+      print "\e[#{prompt_size + @pos + 1}G"
+    else
+      print @prompt
+
+      left_width = width - prompt_size
+
+      start_index = [@pos - left_width + 1, 0].max
+      end_index   = start_index + left_width - 1
+
+      i = 0
+      line.split(AnsiCode).each do |str|
+        if start_with_ansi_code? str
+          # always print ansi codes to ensure the color is right
+          print str
+        else
+          if i >= start_index
+            print str[0..(end_index - i)]
+          elsif i < start_index && i + str.size >= start_index
+            print str[(start_index - i), left_width]
+          end
+
+          i += str.size
+          break if i >= end_index
+        end
+      end
+
+      if @pos < left_width + 1
+        print "\e[#{prompt_size + @pos + 1}G"
+      end
+    end
   end
 
   # Reads a line with no prompt
