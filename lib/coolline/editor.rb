@@ -128,6 +128,12 @@ class Coolline
       line[pos..-1] = ""
     end
 
+    # Removes everything up to the current character
+    def kill_beginning_of_line
+      line[0...pos] = ""
+      self.pos = 0
+    end
+
     # Removes all the characters in the line
     def clear_line
       line.clear

@@ -63,6 +63,13 @@ context "editor of an empty line" do
     asserts(:line).equals ""
   end
 
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals ""
+  end
+
   context "after transposing words" do
     hookup { topic.transpose_words }
 
@@ -142,6 +149,13 @@ context "editor before many words" do
     asserts(:line).equals ""
   end
 
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals "a lovely dragon"
+  end
+
   context "after transposing words" do
     hookup { topic.transpose_words }
 
@@ -214,6 +228,13 @@ context "editor between two words" do
 
     asserts(:pos).equals 4
     asserts(:line).equals "foo "
+  end
+
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals " bar"
   end
 
   context "after transposing words" do
@@ -316,6 +337,13 @@ context "editor between two out of three words" do
 
     asserts(:pos).equals 7
     asserts(:line).equals "foo bar"
+  end
+
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals " baz"
   end
 
   context "after transposing words" do
@@ -423,6 +451,13 @@ context "editor at the end of a line" do
 
     asserts(:pos).equals "a lovely dragon".size
     asserts(:line).equals "a lovely dragon"
+  end
+
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals ""
   end
 
   context "after transposing words" do
@@ -537,6 +572,13 @@ context "editor in the middle of a sentence" do
     asserts(:line).equals "foo bar "
   end
 
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals "baz qux"
+  end
+
   context "after transposing words" do
     hookup { topic.transpose_words }
 
@@ -647,6 +689,13 @@ context "editor in the middle of a word" do
 
     asserts(:pos).equals 9
     asserts(:line).equals "foo bar b"
+  end
+
+  context "after killing the beginning of the line" do
+    hookup { topic.kill_beginning_of_line }
+
+    asserts(:pos).equals 0
+    asserts(:line).equals "az qux"
   end
 
   context "after transposing words" do
