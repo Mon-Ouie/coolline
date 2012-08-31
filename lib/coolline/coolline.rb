@@ -220,10 +220,8 @@ class Coolline
     width       = @input.winsize[1]
     prompt_size = strip_ansi_codes(@prompt).size
     line        = transform(@line)
-
     stripped_line_width = strip_ansi_codes(line).size
-    line += " " * [width - stripped_line_width - prompt_size, 0].max
-
+    # line += " " * [width - stripped_line_width - prompt_size, 0].max
     # reset the color, and kill the line
     print "\r\e[0m\e[0K"
 
