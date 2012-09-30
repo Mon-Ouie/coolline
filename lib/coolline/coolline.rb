@@ -78,6 +78,8 @@ class Coolline
 
     :history_file => HistoryFile,
     :history_size => 5000,
+
+    :modal => false,
   }
 
   include Coolline::Editor
@@ -123,6 +125,7 @@ class Coolline
     self.completion_proc   = Settings[:completion_proc]
     self.history_file      = Settings[:history_file]
     self.history_size      = Settings[:history_size]
+    self.modal             = Settings[:modal]
 
     yield self if block_given?
 
@@ -172,6 +175,15 @@ class Coolline
 
   # @return [String] Current prompt
   attr_accessor :prompt
+
+  # This setting allows to handle the escape key by itself, but also breaks keys
+  # that use a combination of ESC (those include <Alt+key>, arrow keys, and keys
+  # like Home).
+  #
+  # @return [Boolean] If true, don't accumulate keys after escape. False by
+  #   default.
+  attr_accessor :modal
+  alias modal? modal
 
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
@@ -417,7 +429,7 @@ class Coolline
   def handle(char)
     input = if @accumulator
               handle_escape(char)
-            elsif char == "\e"
+            elsif char == "\e" && !modal?
               @accumulator = "\e"
               nil
             else
