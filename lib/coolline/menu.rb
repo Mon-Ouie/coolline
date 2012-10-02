@@ -13,6 +13,26 @@ class Coolline
       @last_line_count = 0
     end
 
+    # @return [String] Information to be displayed
+    attr_accessor :string
+
+    # Sets the menu's string to a list of items, formatted in columns.
+    #
+    # @param [Array<String>] items
+    def list=(items)
+      if items.empty?
+        self.string = ""
+      else
+        height, width = @input.winsize
+
+        col_width  = items.max_by(&:size).size + 1
+        col_count  = width / col_width
+        item_count = col_count * (height - 1)
+
+        self.string = format_columns(items[0, item_count], col_count, col_width)
+      end
+    end
+
     # Renders the menu below the current line.
     #
     # This will ensure not to draw to much, so that the line currently being
@@ -61,6 +81,23 @@ class Coolline
       @last_line_count = 0
     end
 
+    private
+
+    # @param [Array<String>] items Items to show
+    # @param [Integer] col_count Amount of columns to show
+    # @param [Integer] col_width Width of each column
+    #
+    # @return [String] Items formatted appropriately
+    def format_columns(items, col_count, col_width)
+      string = ""
+
+      items.each_slice(col_count) do |line|
+        string << items.map { |s| s.ljust(col_width - 1) } * " " << "\n"
+      end
+
+      string
+    end
+
     # Resets the current ansi color codes.
     def reset_color
       print "\e[0m"
@@ -80,8 +117,5 @@ class Coolline
     def go_to_previous_line
       @output.print "\e[F"
     end
-
-    # @return [String] Information to be displayed
-    attr_accessor :string
   end
 end
