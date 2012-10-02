@@ -31,9 +31,9 @@ class Coolline
         @output.print "\n\r"
         @output.print line[0, width].chomp
       end
-
-      go_to_line([0, height - lines.size].max)
       reset_color
+
+      [lines.size, height].min.times { go_to_previous_line }
 
       @last_line_count = [height - 1, lines.size].min
     end
@@ -54,12 +54,11 @@ class Coolline
         go_to_next_line
         erase_line
       end
+      reset_color
 
-      go_to_line(@output.winsize[0] - @last_line_count)
+      @last_line_count.times { go_to_previous_line }
 
       @last_line_count = 0
-
-      reset_color
     end
 
     # Resets the current ansi color codes.
@@ -77,9 +76,9 @@ class Coolline
       @output.print "\e[E"
     end
 
-    # Moves to the cursor to the beginning of the given (1-indexed) line.
-    def go_to_line(id)
-      @output.print "\e[#{id};1H"
+    # Moves to the beginning of the previous line.
+    def go_to_previous_line
+      @output.print "\e[F"
     end
 
     # @return [String] Information to be displayed
