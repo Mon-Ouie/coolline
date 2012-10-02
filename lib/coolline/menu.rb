@@ -20,6 +20,8 @@ class Coolline
     #
     # @param [Array<String>] items
     def list=(items)
+      open("tmp", "w") { |io| io.puts items }
+
       if items.empty?
         self.string = ""
       else
@@ -92,7 +94,7 @@ class Coolline
       string = ""
 
       items.each_slice(col_count) do |line|
-        string << items.map { |s| s.ljust(col_width - 1) } * " " << "\n"
+        string << line.map { |s| s.ljust(col_width - 1) } * " " << "\n"
       end
 
       string
