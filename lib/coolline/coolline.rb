@@ -127,6 +127,8 @@ class Coolline
     yield self if block_given?
 
     @history ||= History.new(@history_file, @history_size)
+
+    @menu = Menu.new(@input, @output)
   end
 
   # @return [IO]
@@ -173,6 +175,9 @@ class Coolline
   # @return [String] Current prompt
   attr_accessor :prompt
 
+  # @return [Menu]
+  attr_accessor :menu
+
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
   def readline(prompt = ">> ")
@@ -195,6 +200,8 @@ class Coolline
     @history << @line
 
     until (char = @input.getch) == "\r"
+      @menu.erase
+
       handle(char)
       return if @should_exit
 
@@ -204,6 +211,8 @@ class Coolline
 
       render
     end
+
+    @menu.erase
 
     print "\n"
 
@@ -254,11 +263,10 @@ class Coolline
           break if i >= end_index
         end
       end
-
-      if @pos < left_width + 1
-        print "\e[#{prompt_size + @pos + 1}G"
-      end
     end
+
+    @menu.display
+    print "\e[#{[prompt_size + @pos + 1, width].min}G"
   end
 
   # Reads a line with no prompt

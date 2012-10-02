@@ -5,7 +5,7 @@ require 'coderay'
 require 'pp'
 
 Coolline.bind "\C-z" do |c|
-  puts c.object_id
+  c.menu.string = "Coolline object id: #{c.object_id}"
 end
 
 cool = Coolline.new do |c|
