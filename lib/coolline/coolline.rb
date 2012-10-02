@@ -386,18 +386,23 @@ class Coolline
     return if word_boundary? line[pos - 1]
 
     completions = @completion_proc.call(self)
-    return if completions.empty?
 
-    result = completions.inject do |common, el|
-      i = 0
-      i += 1 while common[i] == el[i]
+    if completions.empty?
+      menu.string = "(No completions found)"
+    else
+      menu.list = completions
 
-      el[0...i]
+      result = completions.inject do |common, el|
+        i = 0
+        i += 1 while common[i] == el[i]
+
+        el[0...i]
+      end
+
+      beg = word_beginning_before(pos)
+      line[beg...pos] = result
+      self.pos = beg + result.size
     end
-
-    beg = word_beginning_before(pos)
-    line[beg...pos] = result
-    self.pos = beg + result.size
   end
 
   def word_boundary?(char)
