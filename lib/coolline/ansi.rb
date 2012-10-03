@@ -72,7 +72,27 @@ class Coolline
 
     # Moves the cursor to the given (1-indexed) column number.
     def go_to_col(x)
-      print "\e#{x}G"
+      print "\e[#{x}G"
+    end
+
+    # Resets the current ansi color codes.
+    def reset_color
+      print "\e[0m"
+    end
+
+    # Erases the current line.
+    def erase_line
+      print "\e[0K"
+    end
+
+    # Moves to the beginning of the next line.
+    def go_to_next_line
+      print "\e[E"
+    end
+
+    # Moves to the beginning of the previous line.
+    def go_to_previous_line
+      print "\e[F"
     end
   end
 end

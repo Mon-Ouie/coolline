@@ -4,6 +4,8 @@ class Coolline
   # It displays a string or a list of strings until the user presses another
   # key.
   class Menu
+    include ANSI
+
     def initialize(input, output)
       @input  = input
       @output = output
@@ -20,8 +22,6 @@ class Coolline
     #
     # @param [Array<String>] items
     def list=(items)
-      open("tmp", "w") { |io| io.puts items }
-
       if items.empty?
         self.string = ""
       else
@@ -50,8 +50,8 @@ class Coolline
       lines = @string.lines.to_a
 
       lines[0, height - 1].each do |line|
-        @output.print "\n\r"
-        @output.print line[0, width].chomp
+        print "\n\r"
+        print line[0, width].chomp
       end
       reset_color
 
@@ -100,24 +100,10 @@ class Coolline
       string
     end
 
-    # Resets the current ansi color codes.
-    def reset_color
-      print "\e[0m"
-    end
+    private
 
-    # Erases the current line.
-    def erase_line
-      @output.print "\e[0K"
-    end
-
-    # Moves to the beginning of the next line.
-    def go_to_next_line
-      @output.print "\e[E"
-    end
-
-    # Moves to the beginning of the previous line.
-    def go_to_previous_line
-      @output.print "\e[F"
+    def print(*objs)
+      @output.print(*objs)
     end
   end
 end
