@@ -1,6 +1,8 @@
 require 'io/console'
 
 class Coolline
+  include ANSI
+
   if config_home = ENV["XDG_CONFIG_HOME"] and !config_home.empty?
     ConfigDir = File.join(config_home, "coolline")
   else
@@ -21,8 +23,6 @@ class Coolline
              else
                "/dev/null"
              end
-
-  AnsiCode = %r{(\e\[\??\d+(?:[;\d]*)\w)}
 
   # @return [Hash] All the defaults settings
   Settings = {
@@ -193,7 +193,7 @@ class Coolline
 
     @should_exit = false
 
-    print "\r\e[0m\e[0K"
+    reset_line
     print @prompt
 
     @history.index = @history.size - 1
@@ -227,46 +227,29 @@ class Coolline
   # Displays the current code on the terminal
   def render
     width       = @input.winsize[1]
-    prompt_size = strip_ansi_codes(@prompt).size
+    prompt_size = ansi_length(@prompt)
     line        = transform(@line)
 
-    stripped_line_width = strip_ansi_codes(line).size
+    stripped_line_width = ansi_length(line)
     line += " " * [width - stripped_line_width - prompt_size, 0].max
 
-    # reset the color, and kill the line
-    print "\r\e[0m\e[0K"
+    reset_line
 
-    if strip_ansi_codes(@prompt + line).size <= width
+    if ansi_length(@prompt + line) <= width
       print @prompt + line
-      print "\e[#{prompt_size + @pos + 1}G"
     else
       print @prompt
 
       left_width = width - prompt_size
 
       start_index = [@pos - left_width + 1, 0].max
-      end_index   = start_index + left_width - 1
+      end_index   = start_index + left_width
 
-      i = 0
-      line.split(AnsiCode).each do |str|
-        if start_with_ansi_code? str
-          # always print ansi codes to ensure the color is right
-          print str
-        else
-          if i >= start_index
-            print str[0..(end_index - i)]
-          elsif i < start_index && i + str.size >= start_index
-            print str[(start_index - i), left_width]
-          end
-
-          i += str.size
-          break if i >= end_index
-        end
-      end
+      ansi_print(line, start_index, end_index)
     end
 
     @menu.display
-    print "\e[#{[prompt_size + @pos + 1, width].min}G"
+    go_to_col [prompt_size + @pos + 1, width].min
   end
 
   # Reads a line with no prompt
@@ -407,19 +390,6 @@ class Coolline
 
   def word_boundary?(char)
     char =~ word_boundaries_regexp
-  end
-
-  def strip_ansi_codes(string)
-    string.gsub(AnsiCode, "")
-  end
-
-  def start_with_ansi_code?(string)
-    (string =~ AnsiCode) == 0
-  end
-
-  def clear_screen
-    print "\e[2J"   # clear
-    print "\e[0;0H" # goto 0, 0
   end
 
   private
