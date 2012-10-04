@@ -100,8 +100,6 @@ class Coolline
       string
     end
 
-    private
-
     def print(*objs)
       @output.print(*objs)
     end
