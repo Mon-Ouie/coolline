@@ -23,54 +23,115 @@ class Coolline
              end
 
   AnsiCode = %r{(\e\[\??\d+(?:[;\d]*)\w)}
+  CommonKeys = [
+    Handler.new(/\A(?:\C-h|\x7F)\z/, &:kill_backward_char),
+    Handler.new(?\C-a, &:beginning_of_line),
+    Handler.new(?\C-e, &:end_of_line),
+    Handler.new(?\C-k, &:kill_line),
+    Handler.new(?\C-u, &:kill_beginning_of_line),
+    Handler.new(?\C-f, &:forward_char),
+    Handler.new(?\C-b, &:backward_char),
+    Handler.new(?\C-d, &:kill_current_char_or_leave),
+    Handler.new(?\C-c, &:sigint_self),
+    Handler.new(?\C-w, &:kill_backward_word),
+    Handler.new(?\C-t, &:transpose_chars),
+    Handler.new(?\C-n, &:next_history_line),
+    Handler.new(?\C-p, &:previous_history_line),
+    Handler.new(?\C-r, &:interactive_search),
+    Handler.new(?\C-l, &:clear_screen),
+    Handler.new(?\t,   &:complete),
+    Handler.new(?\C-a..?\C-z) {},
+  ]
+  EmacsKeys = CommonKeys + [
+    Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
+    Handler.new("\eb", &:backward_word),
+    Handler.new("\ef", &:forward_word),
+    Handler.new("\e[A", &:previous_history_line),
+    Handler.new("\e[B", &:next_history_line),
+    Handler.new("\e[3~", &:kill_current_char),
+    Handler.new("\e[5~", &:previous_history_line),
+    Handler.new("\e[6~", &:next_history_line),
+    Handler.new("\e[7~", &:beginning_of_line),
+    Handler.new("\e[8~", &:end_of_line),
+    Handler.new("\e[C", &:forward_char),
+    Handler.new("\e[D", &:backward_char),
+    Handler.new("\e[F", &:end_of_line),
+    Handler.new("\e[H", &:beginning_of_line),
+    Handler.new("\et", &:transpose_words),
+    Handler.new("\ec", &:capitalize_word),
+    Handler.new("\eu", &:uppercase_word),
+    Handler.new("\el", &:lowercase_word),
+    Handler.new("\e<", &:first_history_line),
+    Handler.new("\e>", &:last_history_line),
+
+    Handler.new(/\e.+/) {},
+  ]
+
+  ViInsertModeKeys = CommonKeys + [
+    Handler.new(?\C-c, &:sigint_self),
+    Handler.new(?\e) { |cool|
+      cool.backward_char
+      cool.handlers = ViNormalModeKeys
+    },
+  ]
+  ViNormalModeKeys = [
+    Handler.new(?X, &:kill_backward_char),
+    Handler.new(?x) { |cool| cool.forward_char; cool.kill_backward_char },
+    Handler.new(?D, &:kill_line),
+    Handler.new(?s) { |cool| cool.kill_current_char; cool.vi_insert! },
+    Handler.new(?S) { |cool| cool.clear_line; cool.vi_insert! },
+    Handler.new(?C) { |cool| cool.kill_line; cool.vi_insert! },
+    Handler.new(?r) { |cool| puts @input.getch },
+
+    Handler.new(?0, &:beginning_of_line),
+    Handler.new(?^, &:beginning_of_line),
+    Handler.new(?$, &:end_of_line),
+    Handler.new(?b, &:backward_word),
+    Handler.new(?w) { |cool| cool.forward_word; cool.forward_char },
+    Handler.new(?B, &:backward_word),
+    Handler.new(?W) { |cool| cool.forward_word; cool.forward_char },
+    Handler.new(?e, &:forward_word),
+    Handler.new(?l, &:forward_char),
+    Handler.new(?h, &:backward_char),
+    Handler.new(?k, &:previous_history_line),
+    Handler.new(?j, &:next_history_line),
+    Handler.new(?L, &:last_history_line),
+    Handler.new(?H, &:first_history_line),
+
+    Handler.new(?i, &:vi_insert!),
+    Handler.new(?I) { |cool| cool.beginning_of_line; cool.vi_insert! },
+    Handler.new(?a) { |cool| cool.forward_char; cool.vi_insert! },
+    Handler.new(?A) { |cool| cool.end_of_line; cool.vi_insert! },
+
+    Handler.new(?/, &:interactive_search),
+    Handler.new(??, &:interactive_search),
+
+    # Kind of a funky twist (== go ahead and end in insert mode)
+    Handler.new(?\C-n) { |cool| cool.next_history_line; cool.vi_insert! },
+    Handler.new(?\C-p) { |cool| cool.previous_history_line; cool.vi_insert! },
+
+    ## Special keys, like EmacsKeys:
+    #Handler.new('[A', &:previous_history_line),
+    #Handler.new('[B', &:next_history_line),
+    #Handler.new('[3~', &:kill_current_char),
+    #Handler.new('[5~', &:previous_history_line),
+    #Handler.new('[6~', &:next_history_line),
+    #Handler.new('[7~', &:beginning_of_line),
+    #Handler.new('[8~', &:end_of_line),
+    #Handler.new('[C', &:forward_char),
+    #Handler.new('[D', &:backward_char),
+    #Handler.new('[F', &:end_of_line),
+    #Handler.new('[H', &:beginning_of_line),
+
+    Handler.new(?\e) {}, # Repeated escapes are OK
+    Handler.new(//) { print '\a' } # everything else beeps. Just like real vi.
+  ]
 
   # @return [Hash] All the defaults settings
   Settings = {
     :word_boundaries => [" ", "-", "_"],
 
-    :handlers =>
-    [
-     Handler.new(/\A(?:\C-h|\x7F)\z/, &:kill_backward_char),
-     Handler.new(?\C-a, &:beginning_of_line),
-     Handler.new(?\C-e, &:end_of_line),
-     Handler.new(?\C-k, &:kill_line),
-     Handler.new(?\C-u, &:kill_beginning_of_line),
-     Handler.new(?\C-f, &:forward_char),
-     Handler.new(?\C-b, &:backward_char),
-     Handler.new(?\C-d, &:kill_current_char_or_leave),
-     Handler.new(?\C-c) { Process.kill(:INT, Process.pid) },
-     Handler.new(?\C-w, &:kill_backward_word),
-     Handler.new(?\C-t, &:transpose_chars),
-     Handler.new(?\C-n, &:next_history_line),
-     Handler.new(?\C-p, &:previous_history_line),
-     Handler.new(?\C-r, &:interactive_search),
-     Handler.new(?\C-l, &:clear_screen),
-     Handler.new(?\t,   &:complete),
-     Handler.new(?\C-a..?\C-z) {},
-
-     Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
-     Handler.new("\eb", &:backward_word),
-     Handler.new("\ef", &:forward_word),
-     Handler.new("\e[A", &:previous_history_line),
-     Handler.new("\e[B", &:next_history_line),
-     Handler.new("\e[3~", &:kill_current_char),
-     Handler.new("\e[5~", &:previous_history_line),
-     Handler.new("\e[6~", &:next_history_line),
-     Handler.new("\e[7~", &:beginning_of_line),
-     Handler.new("\e[8~", &:end_of_line),
-     Handler.new("\e[C", &:forward_char),
-     Handler.new("\e[D", &:backward_char),
-     Handler.new("\e[F", &:end_of_line),
-     Handler.new("\e[H", &:beginning_of_line),
-     Handler.new("\et", &:transpose_words),
-     Handler.new("\ec", &:capitalize_word),
-     Handler.new("\eu", &:uppercase_word),
-     Handler.new("\el", &:lowercase_word),
-     Handler.new("\e<", &:first_history_line),
-     Handler.new("\e>", &:last_history_line),
-
-     Handler.new(/\e.+/) {},
-    ],
+    :handlers => EmacsKeys,
 
     :unknown_char_proc => :insert_string.to_proc,
     :transform_proc    => proc { |line| line },
@@ -81,6 +142,33 @@ class Coolline
 
     :modal => false,
   }
+
+  def self.enable_vi_keys
+    Settings[:handlers] = ViInsertModeKeys
+    Settings[:modal] = true
+    warn <<-EOSHAME
+XXX The coolline vi keys are in their infancy. Brace yourself:
+
+We are missing:
+- d and c (need nouns)
+- all register-related stuff: " p P y and Y (Plus X x D s S C r)
+- marks: m ' `
+- f F t T ; ,
+- ~ (should be easy with another editor.rb method)
+- . u (will require rework; EmacsKeys need undo/redo as well)
+- Repetition via #'s (EmacsKeys also need M-#'s)
+- R (needs its own mode)
+- o O (might require some deeper retooling (to operate multiline))
+
+Further inconsistencies:
+- / doesn't repeat with ^R, n, N or anything
+- ? should search forward
+- ^ should be first nonblank char
+- B and W should move all the way to space chars (currenlts identical to b and w)
+
+And finally, what should we do with : ?
+    EOSHAME
+  end
 
   include Coolline::Editor
 
@@ -419,6 +507,14 @@ class Coolline
   def clear_screen
     print "\e[2J"   # clear
     print "\e[0;0H" # goto 0, 0
+  end
+
+  def sigint_self
+    Process.kill :INT, Process.pid
+  end
+
+  def vi_insert!
+    self.handlers = ViInsertModeKeys
   end
 
   private

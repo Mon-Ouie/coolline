@@ -4,6 +4,8 @@ require 'coolline'
 require 'coderay'
 require 'pp'
 
+Coolline.enable_vi_keys if ARGV[0] == '-v'
+
 Coolline.bind "\C-z" do |c|
   puts c.object_id
 end
