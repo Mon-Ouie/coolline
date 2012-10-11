@@ -364,6 +364,24 @@ class Coolline
     line[word_beginning_before(pos)...pos]
   end
 
+  # Sets the word at point, and moves the cursor to after the end of said word.
+  def completed_word=(string)
+    beg = word_beginning_before(pos)
+    line[beg...pos] = string
+    self.pos = beg + string.size
+  end
+
+  # @param [Array<String>] candidates
+  # @return [String] The common part between all completion candidates
+  def common_beginning(candidates)
+    candidates.inject do |common, el|
+      i = 0
+      i += 1 while common[i] == el[i]
+
+      el[0...i]
+    end
+  end
+
   # Tries to complete the current word
   def complete
     return if word_boundary? line[pos - 1]
@@ -374,17 +392,7 @@ class Coolline
       menu.string = "(No completions found)"
     else
       menu.list = completions
-
-      result = completions.inject do |common, el|
-        i = 0
-        i += 1 while common[i] == el[i]
-
-        el[0...i]
-      end
-
-      beg = word_beginning_before(pos)
-      line[beg...pos] = result
-      self.pos = beg + result.size
+      self.completed_word = common_beginning(completions)
     end
   end
 
