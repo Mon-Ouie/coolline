@@ -27,7 +27,7 @@ class Coolline
       else
         height, width = @input.winsize
 
-        col_width  = items.max_by(&:size).size + 1
+        col_width  = items.map { |s| ansi_length(s) }.max
         col_count  = width / col_width
         item_count = col_count * (height - 1)
 
@@ -51,7 +51,7 @@ class Coolline
 
       lines[0, height - 1].each do |line|
         print "\n\r"
-        print line[0, width].chomp
+        ansi_print(line.chomp, 0, width)
       end
       reset_color
 
