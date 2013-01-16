@@ -57,7 +57,7 @@ class Coolline
     end
 
     def []=(id, val)
-      @lines[id] = val
+      @lines[id] = val.dup
     end
 
     def save_line
