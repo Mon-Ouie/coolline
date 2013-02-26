@@ -78,7 +78,7 @@ class Coolline
       @io.rewind
 
       if line_count < @max_size
-        @lines.concat @io.lines.map(&:chomp)
+        @lines.concat @io.map(&:chomp)
       else
         @io.each do |line| # surely inefficient
           @lines << line.chomp
