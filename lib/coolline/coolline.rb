@@ -62,6 +62,9 @@ class Coolline
      Handler.new("\e[D", &:backward_char),
      Handler.new("\e[F", &:end_of_line),
      Handler.new("\e[H", &:beginning_of_line),
+     Handler.new("\eOH", &:beginning_of_line),
+     Handler.new("\eOF", &:end_of_line),
+     Handler.new("\ed", &:kill_forward_word),
      Handler.new("\et", &:transpose_words),
      Handler.new("\ec", &:capitalize_word),
      Handler.new("\eu", &:uppercase_word),
@@ -180,36 +183,39 @@ class Coolline
 
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
-  def readline(prompt = ">> ")
+  def readline(prompt = ">> ", default_line = "")
     @prompt = prompt
 
     @history.delete_empty
 
-    @line        = ""
-    @pos         = 0
+    @line        = default_line
+    @pos         = @line.size
     @accumulator = nil
 
     @history_moved = false
 
     @should_exit = false
 
-    reset_line
-    print @prompt
+    render
 
     @history.index = @history.size - 1
     @history << @line
 
-    until (char = @input.getch) == "\r"
-      @menu.erase
+    @input.raw do |raw_stdin|
 
-      handle(char)
-      return if @should_exit
+      until (char = raw_stdin.read 1) == "\r"
+        @menu.erase
 
-      if @history_moved
-        @history_moved = false
+        handle(char)
+        return if @should_exit
+
+        if @history_moved
+          @history_moved = false
+        end
+
+        render
       end
 
-      render
     end
 
     @menu.erase
@@ -400,6 +406,11 @@ class Coolline
     char =~ word_boundaries_regexp
   end
 
+  def replace_line(new_line)
+    @line = new_line
+    @pos = new_line.size
+  end
+
   private
   def transform(line)
     @transform_proc.call(line)
@@ -427,7 +438,8 @@ class Coolline
   def handle_escape(char)
     if char == "[" && @accumulator =~ /\A\e?\e\z/ or
         char =~ /\d/ && @accumulator =~ /\A\e?\e\[\d*\z/ or
-        char == "\e" && @accumulator == "\e"
+        char == "\e" && @accumulator == "\e" or
+        char == "O" && @accumulator == "\e"
       @accumulator << char
       nil
     else

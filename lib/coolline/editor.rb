@@ -110,6 +110,15 @@ class Coolline
       end
     end
 
+    # Removes the next word
+    def kill_forward_word
+      if pos != line.size
+        ending = word_end_after(pos)
+
+        line[pos..ending] = ""
+      end
+    end
+
     # Removes the previous character
     def kill_backward_char
       if pos > 0
