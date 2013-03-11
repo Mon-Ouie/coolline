@@ -183,21 +183,20 @@ class Coolline
 
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
-  def readline(prompt = ">> ")
+  def readline(prompt = ">> ", default_line = "")
     @prompt = prompt
 
     @history.delete_empty
 
-    @line        = ""
-    @pos         = 0
+    @line        = default_line
+    @pos         = @line.size
     @accumulator = nil
 
     @history_moved = false
 
     @should_exit = false
 
-    reset_line
-    print @prompt
+    render
 
     @history.index = @history.size - 1
     @history << @line
@@ -405,6 +404,11 @@ class Coolline
 
   def word_boundary?(char)
     char =~ word_boundaries_regexp
+  end
+
+  def replace_line(new_line)
+    @line = new_line
+    @pos = new_line.size
   end
 
   private
