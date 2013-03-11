@@ -25,6 +25,8 @@ eof
   s.files |= Dir["test/**/*.rb"]
   s.files << "repl.rb" << ".gemtest"
 
+  s.extra_rdoc_files = ["README.md"]
+
   s.require_paths = %w[lib]
 
   s.add_development_dependency "riot"
