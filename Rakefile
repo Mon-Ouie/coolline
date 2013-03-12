@@ -6,7 +6,7 @@ task :test do
 end
 
 task :build do
-  sh "gem build .gemspec"
+  sh "gem build coolline.gemspec"
 end
 
 task :release => :build do
