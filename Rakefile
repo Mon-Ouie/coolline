@@ -1,4 +1,4 @@
-$LOAD_PATH.unshift File.expand_path(File.join("lib", File.dirname(__FILE__)))
+$LOAD_PATH.unshift File.expand_path("../lib", __FILE__)
 require 'coolline/version'
 
 task :test do
