@@ -20,13 +20,18 @@ class Coolline
 
     # Sets the menu's string to a list of items, formatted in columns.
     #
+    # If some items are to wide to be showed, they will be excluded from the
+    # list.
+    #
     # @param [Array<String>] items
     def list=(items)
+      height, width = @input.winsize
+
+      items = items.reject { |s| ansi_length(s) > width }
+
       if items.empty?
         self.string = ""
       else
-        height, width = @input.winsize
-
         col_width  = items.map { |s| ansi_length(s) }.max
         col_count  = width / col_width
         item_count = col_count * (height - 1)
