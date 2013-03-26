@@ -188,7 +188,7 @@ class Coolline
 
     @history.delete_empty
 
-    @line        = default_line
+    @line        = default_line.dup
     @pos         = @line.size
     @accumulator = nil
 
