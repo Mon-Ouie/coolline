@@ -1,33 +1,67 @@
 Coolline
 ========
 
-Coolline is a simple readline-like library that allows you to change the way the
-input is displayed while theuser is typing. This is meant to allow the
-implementation of live syntax highlighting:
+Coolline is a readline-like library written in pure Ruby.
 
-    require 'coolline'
-    require 'coderay'
-    require 'pp'
+It offers all of the core readline features, but with a cleaner, simpler
+implementation, and the ability to easily customize its behaviour.
 
-    cool = Coolline.new do |c|
-      c.transform_proc = proc do
-        CodeRay.scan(c.line, :ruby).term
-      end
+Customizations include: modifying all key bindings, binding keys custom functions,
+full control over history and tab completion, and control over what's displayed
+to the user (transforms).
 
-      c.completion_proc = proc do
-        word = c.completed_word
-        Object.constants.map(&:to_s).select { |w| w.start_with? word }
-      end
-    end
+Usage
+=====
 
-    loop do
-      line = cool.readline
+If you don't need anything fancy, it can work like Ruby's built-in `Readline.readline`:
 
-      obj  = eval(line)
+```ruby
+result = Coolline.readline
+```
 
-      print "=> "
-      pp obj
-    end
+But, of course you want something fancy, otherwise you'd be using `readline`!
+Here's how to create a simple REPL with live syntax highlighting and tab completion:
+
+```ruby
+require 'coolline'
+require 'coderay'
+require 'pp'
+
+cool = Coolline.new do |c|
+
+  # Before the line is displayed, it gets passed through this proc,
+  # which performs syntax highlighting.
+  c.transform_proc = proc do
+    CodeRay.scan(c.line, :ruby).term
+  end
+
+  # Add tab completion for constants (and classes)
+  c.completion_proc = proc do
+    word = c.completed_word
+    Object.constants.map(&:to_s).select { |w| w.start_with? word }
+  end
+
+  # Alt-R should reverse the line, because we like to look at our code in the mirror
+  c.bind "\er" do |cool|
+    cool.replace_line cool.line.reverse
+  end
+
+end
+
+loop do
+  # READ
+  line = cool.readline
+
+  # EVAL
+  obj = eval(line)
+
+  # PRINT
+  print "=> "
+  pp obj
+
+  # LOOP
+end
+```
 
 Configuration
 =============
@@ -36,13 +70,15 @@ Coolline automatically loads a config file before starting, which allows adding
 new key bindings to it. The file is just a chunk of arbitrary ruby code located
 at ``$XDG_CONFIG_HOME/coolline/coolline.rb``.
 
-     Coolline.bind "\C-z" do |cool|
-       puts "Testing key binding with #{cool}!"
-     end
+```ruby
+Coolline.bind "\C-z" do |cool|
+  puts "Testing key binding with #{cool}!"
+end
+```
 
 Installation
 ============
 
     gem install coolline
 
-Notice this needs io-console (which is part of Ruby 1.9.3).
+Note: If your Ruby version is less than 1.9.3, you also need to install the `io-console` gem.
