@@ -110,6 +110,10 @@ class Coolline
     Coolline::Settings[:handlers].unshift Coolline::Handler.new(key, &action)
   end
 
+  def bind(key, &action)
+    handlers.unshift Coolline::Handler.new(key, &action)
+  end
+
   # Creates a new cool line.
   #
   # @yieldparam [Coolline] self
@@ -181,6 +185,11 @@ class Coolline
   # @return [Menu]
   attr_accessor :menu
 
+  # Perform a quick, one-off readline (equivalent to `Coolline.new.readline(...)`)
+  def self.readline(*args)
+    new.readline(*args)
+  end
+
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
   def readline(prompt = ">> ", default_line = "")
@@ -188,7 +197,7 @@ class Coolline
 
     @history.delete_empty
 
-    @line        = default_line
+    @line        = default_line.dup
     @pos         = @line.size
     @accumulator = nil
 
