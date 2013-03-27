@@ -197,13 +197,11 @@ class Coolline
 
     @history.delete_empty
 
-    @line        = default_line.dup
-    @pos         = @line.size
-    @accumulator = nil
-
+    @accumulator   = nil
     @history_moved = false
+    @should_exit   = false
 
-    @should_exit = false
+    self.line = default_line
 
     render
 
@@ -415,9 +413,11 @@ class Coolline
     char =~ word_boundaries_regexp
   end
 
-  def replace_line(new_line)
-    @line = new_line
-    @pos = new_line.size
+  def line=(new_line)
+    @line = new_line.dup
+    @pos  = new_line.size
+
+    render
   end
 
   private
