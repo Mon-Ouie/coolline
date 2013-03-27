@@ -15,49 +15,53 @@ Usage
 
 If you don't need anything fancy, it can work like Ruby's built-in `Readline.readline`:
 
-    result = Coolline.readline
+```ruby
+result = Coolline.readline
+```
 
 But, of course you want something fancy, otherwise you'd be using `readline`!
 Here's how to create a simple REPL with live syntax highlighting and tab completion:
 
-    require 'coolline'
-    require 'coderay'
-    require 'pp'
+```ruby
+require 'coolline'
+require 'coderay'
+require 'pp'
 
-    cool = Coolline.new do |c|
+cool = Coolline.new do |c|
 
-      # Before the line is displayed, it gets passed through this proc,
-      # which performs syntax highlighting.
-      c.transform_proc = proc do
-        CodeRay.scan(c.line, :ruby).term
-      end
+  # Before the line is displayed, it gets passed through this proc,
+  # which performs syntax highlighting.
+  c.transform_proc = proc do
+    CodeRay.scan(c.line, :ruby).term
+  end
 
-      # Add tab completion for constants (and classes)
-      c.completion_proc = proc do
-        word = c.completed_word
-        Object.constants.map(&:to_s).select { |w| w.start_with? word }
-      end
+  # Add tab completion for constants (and classes)
+  c.completion_proc = proc do
+    word = c.completed_word
+    Object.constants.map(&:to_s).select { |w| w.start_with? word }
+  end
 
-      # Alt-R should reverse the line, because we like to look at our code in the mirror
-      c.bind "\er" do |cool|
-        cool.line.reverse!
-      end
+  # Alt-R should reverse the line, because we like to look at our code in the mirror
+  c.bind "\er" do |cool|
+    cool.line.reverse!
+  end
 
-    end
+end
 
-    loop do
-      # READ
-      line = cool.readline
+loop do
+  # READ
+  line = cool.readline
 
-      # EVAL
-      obj = eval(line)
+  # EVAL
+  obj = eval(line)
 
-      # PRINT
-      print "=> "
-      pp obj
+  # PRINT
+  print "=> "
+  pp obj
 
-      # LOOP
-    end
+  # LOOP
+end
+```
 
 Configuration
 =============
@@ -66,9 +70,11 @@ Coolline automatically loads a config file before starting, which allows adding
 new key bindings to it. The file is just a chunk of arbitrary ruby code located
 at ``$XDG_CONFIG_HOME/coolline/coolline.rb``.
 
-    Coolline.bind "\C-z" do |cool|
-      puts "Testing key binding with #{cool}!"
-    end
+```ruby
+Coolline.bind "\C-z" do |cool|
+  puts "Testing key binding with #{cool}!"
+end
+```
 
 Installation
 ============
