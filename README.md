@@ -40,7 +40,7 @@ Here's how to create a simple REPL with live syntax highlighting and tab complet
 
       # Alt-R should reverse the line, because we like to look at our code in the mirror
       c.bind "\er" do |cool|
-        cool.replace_line cool.line.reverse
+        cool.line.reverse!
       end
 
     end
