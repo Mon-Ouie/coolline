@@ -210,7 +210,7 @@ class Coolline
 
     @input.raw do |raw_stdin|
 
-      until (char = raw_stdin.read 1) == "\r"
+      until (char = raw_stdin.getch) == "\r"
         @menu.erase
 
         handle(char)
