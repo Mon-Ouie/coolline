@@ -209,8 +209,7 @@ class Coolline
     @history << @line
 
     @input.raw do |raw_stdin|
-
-      until (char = raw_stdin.getch) == "\r"
+      until (char = raw_stdin.getc) == "\r"
         @menu.erase
 
         handle(char)
