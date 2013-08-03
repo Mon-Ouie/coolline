@@ -388,7 +388,7 @@ class Coolline
   def common_beginning(candidates)
     candidates.inject do |common, el|
       i = 0
-      i += 1 while common[i] == el[i]
+      i += 1 while common[i] == el[i] and i != el.size
 
       el[0...i]
     end
