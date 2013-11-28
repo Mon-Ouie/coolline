@@ -23,7 +23,7 @@ eof
 
   s.files |= Dir["lib/**/*.rb"]
   s.files |= Dir["test/**/*.rb"]
-  s.files << "repl.rb" << ".gemtest"
+  s.files << "repl.rb" << ".gemtest" << "LICENSE"
 
   s.extra_rdoc_files = ["README.md"]
 
