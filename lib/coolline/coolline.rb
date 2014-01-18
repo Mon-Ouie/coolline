@@ -193,6 +193,23 @@ class Coolline
   # Reads a line from the terminal
   # @param [String] prompt Characters to print before each line
   def readline(prompt = ">> ", default_line = "")
+    if @input.tty?
+      readline_full(prompt, default_line)
+    else
+      readline_dumb(prompt)
+    end
+  end
+
+  def readline_dumb(prompt)
+    print prompt
+    line = @input.gets
+    self.line = line ? line.chomp : ""
+    print transform(line), "\n"
+
+    line.chomp if line
+  end
+
+  def readline_full(prompt = ">> ", default_line = "")
     @prompt = prompt
 
     @history.delete_empty
@@ -221,7 +238,6 @@ class Coolline
 
         render
       end
-
     end
 
     @menu.erase
@@ -238,6 +254,8 @@ class Coolline
 
   # Displays the current code on the terminal
   def render
+    return unless @input.tty?
+
     width       = @input.winsize[1]
     prompt_size = ansi_length(@prompt)
     line        = transform(@line)

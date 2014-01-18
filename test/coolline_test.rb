@@ -15,3 +15,16 @@ context "a user uses colors for live code highlighting" do
     asserts(:strip_ansi_codes, "\e[38;5;232mHate\e[0m").equals "Hate"
   end
 end
+
+context "a user uses non-tty input" do
+  setup do
+    Coolline.new { |c|
+      c.input = StringIO.new("p 42\np 82\n")
+      c.output = StringIO.new
+    }
+  end
+
+  denies(:readline).raises_kind_of Exception
+  asserts(:readline).equals "p 82"
+  asserts(:readline).nil
+end
