@@ -87,12 +87,14 @@ class Coolline
 
     # Moves to the beginning of the next line.
     def go_to_next_line
-      print "\e[E"
+      # CNL/CPL aren't as widely supported as this trick
+      # (Namely, iTerm2 does not support them).
+      print "\e[1B\r"
     end
 
     # Moves to the beginning of the previous line.
     def go_to_previous_line
-      print "\e[F"
+      print "\e[1A\r"
     end
   end
 end
