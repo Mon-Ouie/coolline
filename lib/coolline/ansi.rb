@@ -12,7 +12,7 @@ class Coolline
     # @return [Integer] Amount of characters within the string, disregarding
     #   color codes.
     def ansi_length(string)
-      strip_ansi_codes(string).length
+      strip_ansi_codes(string).each_char.map{|c| c.ascii_only? ? 1 : 2}.inject(0,:+)
     end
 
     # @return [String] The initial string without ANSI codes.

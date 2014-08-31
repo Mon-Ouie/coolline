@@ -432,7 +432,7 @@ class Coolline
 
   def line=(new_line)
     @line = new_line.dup
-    @pos  = new_line.size
+    @pos  = new_line.each_char.map{|c| c.ascii_only? ? 1 : 2}.inject(0,:+)
 
     render
   end
