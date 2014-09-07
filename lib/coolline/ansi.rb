@@ -9,10 +9,10 @@ class Coolline
   module ANSI
     Code = %r{(\e\[\??\d+(?:[;\d]*)\w)}
 
-    # @return [Integer] Amount of characters within the string, disregarding
-    #   color codes.
+    # @return [Integer] Display width taken up by the string, where
+    #   color codes take up no width at all.
     def ansi_length(string)
-      strip_ansi_codes(string).length
+      UnicodeUtils.display_width strip_ansi_codes(string)
     end
 
     # @return [String] The initial string without ANSI codes.
@@ -31,20 +31,22 @@ class Coolline
     #
     # @param [String] string
     # @param [Integer] start
-    # @param [Integer] stop Stop index, excluded from the range.
+    # @param [Integer] stop Stop column index, excluded from the range.
     def ansi_print(string, start, stop)
       i = 0
       string.split(Code).each do |str|
         if start_with_ansi_code? str
           print str
         else
-          if i >= start
-            print str[0..(stop - i - 1)]
-          elsif i < start && i + str.size >= start
-            print str[(start - i), stop - start - 1]
-          end
+          width = UnicodeUtils.display_width str
 
-          i += str.size
+          UnicodeUtils.each_grapheme(str) { |g|
+            width = UnicodeUtils.display_width g
+            print g if i >= start && i + width < stop
+            i += width
+            break if i >= stop
+          }
+
           break if i >= stop
         end
       end

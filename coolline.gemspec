@@ -28,6 +28,7 @@ eof
   s.extra_rdoc_files = ["README.md"]
 
   s.require_paths = %w[lib]
+  s.add_dependency "unicode_utils", "~> 1.4"
 
   s.add_development_dependency "riot"
 end

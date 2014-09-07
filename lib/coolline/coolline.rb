@@ -1,4 +1,5 @@
 require 'io/console'
+require 'unicode_utils'
 
 class Coolline
   include ANSI
@@ -265,6 +266,9 @@ class Coolline
 
     reset_line
 
+    width_before = UnicodeUtils.display_width @line[0..@pos]
+    width_before += 1 if @pos >= @line.length
+
     if ansi_length(@prompt + line) <= width
       print @prompt + line
     else
@@ -272,14 +276,15 @@ class Coolline
 
       left_width = width - prompt_size
 
-      start_index = [@pos - left_width + 1, 0].max
+      start_index = [width_before - left_width, 0].max
       end_index   = start_index + left_width
 
       ansi_print(line, start_index, end_index)
     end
 
     @menu.display
-    go_to_col [prompt_size + @pos + 1, width].min
+    go_to_col [prompt_size + width_before, width].
+      min
   end
 
   # Reads a line with no prompt
