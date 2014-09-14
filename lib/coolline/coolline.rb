@@ -28,6 +28,7 @@ class Coolline
   # @return [Hash] All the defaults settings
   Settings = {
     :word_boundaries => [" ", "-", "_"],
+    :completion_word_boundaries => [" ", "-", "_"],
 
     :handlers =>
     [
@@ -124,7 +125,9 @@ class Coolline
     @input  = STDIN # must be the actual IO object
     @output = $stdout
 
-    self.word_boundaries   = Settings[:word_boundaries].dup
+    self.word_boundaries            = Settings[:word_boundaries].dup
+    self.completion_word_boundaries = Settings[:completion_word_boundaries].dup
+
     self.handlers          = Settings[:handlers].dup
     self.transform_proc    = Settings[:transform_proc]
     self.unknown_char_proc = Settings[:unknown_char_proc]
@@ -142,7 +145,8 @@ class Coolline
   # @return [IO]
   attr_accessor :input, :output
 
-  # @return [Array<String, Regexp>] Expressions detected as word boundaries
+  # @return [Array<String, Regexp>] Expressions detected as word boundaries for
+  #   the purpose of motion commands.
   attr_reader :word_boundaries
 
   # @return [Regexp] Regular expression to match word boundaries
@@ -152,6 +156,10 @@ class Coolline
     @word_boundaries = array
     @word_boundaries_regexp = /\A#{Regexp.union(*array)}\z/
   end
+
+  # @return [Array<String, Regexp>] Expressions detected as word boundaries for
+  #   the purpose of autocompletion.
+  attr_accessor :completion_word_boundaries
 
   # @return [Proc] Proc called to change the way a line is displayed
   attr_accessor :transform_proc
@@ -419,6 +427,9 @@ class Coolline
 
   # Tries to complete the current word
   def complete
+    old_word_boundaries = word_boundaries
+    self.word_boundaries = completion_word_boundaries
+
     return if word_boundary? line[pos - 1]
 
     completions = @completion_proc.call(self)
@@ -429,6 +440,8 @@ class Coolline
       menu.list = completions
       self.completed_word = common_beginning(completions)
     end
+  ensure
+    self.word_boundaries = old_word_boundaries
   end
 
   def word_boundary?(char)
