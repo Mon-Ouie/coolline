@@ -42,12 +42,10 @@ class Coolline
 
           UnicodeUtils.each_grapheme(str) { |g|
             width = UnicodeUtils.display_width g
-            print g if i >= start && i + width < stop
+            print g if i >= start && i + width <= stop
             i += width
             break if i >= stop
           }
-
-          break if i >= stop
         end
       end
     end
