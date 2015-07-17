@@ -1,19 +1,22 @@
 require 'io/console'
 require 'unicode_utils'
+require 'etc'
 
 class Coolline
   include ANSI
 
+  HomeDir = ENV["HOME"] || Etc.getpwuid.dir
+
   if config_home = ENV["XDG_CONFIG_HOME"] and !config_home.empty?
     ConfigDir = File.join(config_home, "coolline")
   else
-    ConfigDir = File.join(ENV["HOME"], ".config", "coolline")
+    ConfigDir = File.join(HomeDir, ".config", "coolline")
   end
 
   if cache_home = ENV["XDG_CACHE_HOME"] and !cache_home.empty?
     CacheDir = File.join(cache_home, "coolline")
   else
-    CacheDir = File.join(ENV["HOME"], ".cache", "coolline")
+    CacheDir = File.join(HomeDir, ".cache", "coolline")
   end
 
   ConfigFile = File.join(ConfigDir, "coolline.rb")
