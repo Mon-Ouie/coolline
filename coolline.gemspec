@@ -1,9 +1,7 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-$LOAD_PATH.unshift File.expand_path(File.join("lib", File.dirname(__FILE__)))
-
-require 'coolline/version'
+require File.join(File.dirname(__FILE__), "lib", "coolline", "version")
 
 Gem::Specification.new do |s|
   s.name = "coolline"
@@ -30,5 +28,6 @@ eof
   s.require_paths = %w[lib]
   s.add_dependency "unicode_utils", "~> 1.4"
 
+  s.add_development_dependency "rake"
   s.add_development_dependency "riot"
 end
