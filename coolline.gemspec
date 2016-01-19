@@ -1,14 +1,12 @@
 #!/usr/bin/env ruby
 # -*- coding: utf-8 -*-
 
-$LOAD_PATH.unshift File.expand_path(File.join("lib", File.dirname(__FILE__)))
-
-require 'coolline/version'
+require File.expand_path('../lib/coolline/version', __FILE__)
 
 Gem::Specification.new do |s|
   s.name = "coolline"
 
-  s.version = Coolline::Version
+  s.version = Coolline::VERSION
 
   s.summary = "Sounds like readline, smells like readline, but isn't readline"
   s.description = <<-eof
