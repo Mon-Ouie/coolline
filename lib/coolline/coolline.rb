@@ -509,7 +509,7 @@ class Coolline
         7.times{c+= STDIN.getc.chr}
       }
       # wait just long enough for special keys to get swallowed
-      extra_thread.join(0.00001)
+      extra_thread.join(0.0001)
       # kill thread so not-so-long special keys don't wait on getc
       extra_thread.kill
     end
