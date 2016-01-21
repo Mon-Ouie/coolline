@@ -51,8 +51,17 @@ class Coolline
      Handler.new(?\C-a..?\C-z) {},
 
      Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
+     Handler.new("\e[1;5D", &:backward_word),
+     Handler.new("\e[1;5C", &:forward_word),
      Handler.new("\eb", &:backward_word),
-     Handler.new("\ef", &:forward_word),
+     Handler.new("\e[c", &:backward_word),
+     Handler.new("\e[5D", &:backward_word),
+     Handler.new("\eOD", &:backward_word),
+     Handler.new("\eOd", &:backward_word),
+     Handler.new("\e[d", &:forward_word),
+     Handler.new("\e[5C", &:forward_word),
+     Handler.new("\eOC", &:forward_word),
+     Handler.new("\eOc", &:forward_word),
      Handler.new("\e[A", &:previous_history_line),
      Handler.new("\e[B", &:next_history_line),
      Handler.new("\e[3~", &:kill_current_char),
@@ -235,9 +244,8 @@ class Coolline
     @history << @line
 
     @input.raw do |raw_stdin|
-      until (char = raw_stdin.getc) == "\r"
+      until (char = read_char) == "\r"
         @menu.erase
-
         handle(char)
         return if @should_exit
 
@@ -493,4 +501,19 @@ class Coolline
       str
     end
   end
+
+  def read_char
+    c = STDIN.getch
+    if(c=="\e")
+      extra_thread = Thread.new{
+        7.times{c+= STDIN.getc.chr}
+      }
+      # wait just long enough for special keys to get swallowed
+      extra_thread.join(0.0001)
+      # kill thread so not-so-long special keys don't wait on getc
+      extra_thread.kill
+    end
+    c
+  end
+
 end
