@@ -53,6 +53,8 @@ class Coolline
      Handler.new(/\A\e(?:\C-h|\x7F)\z/, &:kill_backward_word),
      Handler.new("\eb", &:backward_word),
      Handler.new("\ef", &:forward_word),
+     Handler.new("\e[1;5D", &:backward_word),
+     Handler.new("\e[1;5C", &:forward_word),
      Handler.new("\e[A", &:previous_history_line),
      Handler.new("\e[B", &:next_history_line),
      Handler.new("\e[3~", &:kill_current_char),
@@ -481,7 +483,8 @@ class Coolline
 
   def handle_escape(char)
     if char == "[" && @accumulator =~ /\A\e?\e\z/ or
-        char =~ /\d/ && @accumulator =~ /\A\e?\e\[\d*\z/ or
+        char =~ /\d/ && @accumulator =~ /\A\e?\e\[(\d+;)?\d*\z/ or
+        char == ';' && @accumulator =~ /\A\e?\e\[\d+\z/ or
         char == "\e" && @accumulator == "\e" or
         char == "O" && @accumulator == "\e"
       @accumulator << char
